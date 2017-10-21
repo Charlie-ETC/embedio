@@ -112,12 +112,23 @@
 
     internal class AddtionalParameterInfo
     {
+#if WINDOWS_UWP
+        private readonly MethodInfo _parseMethod;
+#else
         private readonly TypeConverter _converter;
+#endif
 
         public AddtionalParameterInfo(ParameterInfo parameterInfo)
         {
             Info = parameterInfo;
+#if WINDOWS_UWP
+            var parameterTypeNullable = Nullable.GetUnderlyingType(parameterInfo.ParameterType);
+            _parseMethod = parameterTypeNullable != null ?
+                parameterTypeNullable.GetMethod(nameof(int.Parse), new[] { typeof(string) }) :
+                parameterInfo.ParameterType.GetMethod(nameof(int.Parse), new[] { typeof(string) });
+#else
             _converter = TypeDescriptor.GetConverter(parameterInfo.ParameterType);
+#endif
 
             if (parameterInfo.ParameterType.GetTypeInfo().IsValueType)
                 Default = Activator.CreateInstance(parameterInfo.ParameterType);
@@ -132,7 +143,11 @@
                 value = null; // ignore whitespace
 
             // convert and add to arguments, if null use default value
+#if WINDOWS_UWP
+            return value == null ? Default : _parseMethod.Invoke(null, new[] { value });
+#else
             return value == null ? Default : _converter.ConvertFromString(value);
+#endif
         }
     }
 }

@@ -43,6 +43,10 @@ namespace Unosquare.Net
     using System;
     using System.Threading.Tasks;
     using Swan;
+#if WINDOWS_UWP
+    using Windows.Security.Cryptography;
+    using Windows.Storage.Streams;
+#endif
 
     /// <summary>
     /// Indicates whether a WebSocket frame is the final frame of a message.
@@ -353,7 +357,12 @@ Extended Payload Length: {extPayloadLen}
         private static byte[] CreateMaskingKey()
         {
             var key = new byte[4];
+#if WINDOWS_UWP
+            var buf = CryptographicBuffer.GenerateRandom(4);
+            CryptographicBuffer.CopyToByteArray(buf, out key);
+#else
             WebSocket.RandomNumber.GetBytes(key);
+#endif
 
             return key;
         }

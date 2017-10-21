@@ -36,6 +36,10 @@ namespace Unosquare.Net
     using System.Net.Sockets;
     using System.Threading;
     using System.Threading.Tasks;
+#if WINDOWS_UWP
+    using Windows.Networking.Sockets;
+    using Windows.Networking;
+#endif
 #if SSL
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
@@ -45,14 +49,18 @@ using System.Security.Cryptography;
     {
         private readonly Dictionary<HttpConnection, HttpConnection> _unregistered;
         private readonly IPEndPoint _endpoint;
+#if WINDOWS_UWP
+        private readonly StreamSocketListener _sockListener;
+#else
         private readonly Socket _sock;
+#endif
         private Hashtable _prefixes; // Dictionary <ListenerPrefix, HttpListener>
         private ArrayList _unhandled; // List<ListenerPrefix> unhandled; host = '*'
         private ArrayList _all; // List<ListenerPrefix> all;  host = '+       
 #if SSL
         private bool _secure = false;
         private X509Certificate _cert = null;
-#endif        
+#endif
 
         public EndPointListener(HttpListener listener, IPAddress addr, int port, bool secure = false)
         {
@@ -69,6 +77,15 @@ using System.Security.Cryptography;
             }
 
             _endpoint = new IPEndPoint(addr, port);
+#if WINDOWS_UWP
+            _sockListener = new StreamSocketListener();
+            _sockListener.ConnectionReceived += (streamSockListener, args) =>
+            {
+                OnAccept(this, streamSockListener, args);
+            };
+            _sockListener.BindEndpointAsync(new HostName(
+                _endpoint.Address.ToString()), _endpoint.Port.ToString()).GetResults();
+#else
             _sock = new Socket(addr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _sock.Bind(_endpoint);
             _sock.Listen(500);
@@ -76,6 +93,7 @@ using System.Security.Cryptography;
             args.Completed += OnAccept;
             Socket dummy = null;
             Accept(_sock, args, ref dummy);
+#endif
             _prefixes = new Hashtable();
             _unregistered = new Dictionary<HttpConnection, HttpConnection>();
         }
@@ -105,7 +123,11 @@ using System.Security.Cryptography;
 
         public void Close()
         {
+#if WINDOWS_UWP
+            _sockListener.Dispose();
+#else
             _sock.Dispose();
+#endif
             List<HttpConnection> connections;
 
             lock (_unregistered)
@@ -226,6 +248,24 @@ using System.Security.Cryptography;
             }
         }
 
+#if WINDOWS_UWP
+        private static void ProcessAccept(EndPointListener epl,
+            StreamSocketListenerConnectionReceivedEventArgs args)
+        {
+            var conn = new HttpConnection(args.Socket, epl);
+            lock (epl._unregistered)
+            {
+                epl._unregistered[conn] = conn;
+            }
+
+            var waitTask = conn.BeginReadRequest();
+        }
+
+        private static void OnAccept(EndPointListener epl,
+            StreamSocketListener listener,
+            StreamSocketListenerConnectionReceivedEventArgs args) => ProcessAccept(epl, args);
+#else
+
         private static void Accept(Socket socket, SocketAsyncEventArgs e, ref Socket accepted)
         {
             e.AcceptSocket = null;
@@ -290,6 +330,7 @@ using System.Security.Cryptography;
         }
 
         private static void OnAccept(object sender, SocketAsyncEventArgs e) => ProcessAccept(e);
+#endif
 
         private static HttpListener MatchFromList(string path, ArrayList list, out ListenerPrefix prefix)
         {

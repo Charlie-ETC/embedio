@@ -49,14 +49,22 @@ namespace Unosquare.Net
     using System.Collections.Generic;
     using System.IO;
     using System.Net;
-    using System.Net.Sockets;
-    using System.Security.Cryptography;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Labs.EmbedIO;
     using Labs.EmbedIO.Constants;
     using Swan;
+#if WINDOWS_UWP
+    using Windows.Security.Cryptography;
+    using Windows.Security.Cryptography.Core;
+    using Windows.Storage.Streams;
+    using Windows.Networking.Sockets;
+    using Windows.Networking;
+#else
+    using System.Net.Sockets;
+    using System.Security.Cryptography;
+#endif
 
     /// <summary>
     /// Implements the WebSocket interface.
@@ -88,11 +96,13 @@ namespace Unosquare.Net
         /// </remarks>
         internal static readonly int FragmentLength = 1016;
 
+#if !WINDOWS_UWP
         /// <summary>
         /// Represents the random number generator used internally.
         /// </summary>
         internal static readonly RandomNumberGenerator RandomNumber = RandomNumberGenerator.Create();
-        
+#endif
+
         private const string Guid = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
         
         private readonly Action<MessageEventArgs> _message;
@@ -120,9 +130,13 @@ namespace Unosquare.Net
         private AutoResetEvent _receivePong;
 #if SSL
         private ClientSslConfiguration _sslConfig;
-#endif        
+#endif
         private Stream _stream;
+#if WINDOWS_UWP
+        private StreamSocket _streamSocket;
+#else
         private TcpClient _tcpClient;
+#endif
         private Uri _uri;
         private TimeSpan _waitTime;
 
@@ -689,19 +703,31 @@ namespace Unosquare.Net
         internal static string CreateBase64Key()
         {
             var src = new byte[16];
+#if WINDOWS_UWP
+            var buf = CryptographicBuffer.GenerateRandom(16);
+            return CryptographicBuffer.EncodeToBase64String(buf);
+#else
             RandomNumber.GetBytes(src);
 
             return Convert.ToBase64String(src);
+#endif
         }
 
         internal static string CreateResponseKey(string base64Key)
         {
             var buff = new StringBuilder(base64Key, 64);
             buff.Append(Guid);
+#if WINDOWS_UWP
+            IBuffer buffUtf8Msg = CryptographicBuffer.ConvertStringToBinary(buff.ToString(), BinaryStringEncoding.Utf8);
+            var objAlgProv = HashAlgorithmProvider.OpenAlgorithm(HashAlgorithmNames.Sha1);
+            var buf = objAlgProv.HashData(buffUtf8Msg);
+            return CryptographicBuffer.EncodeToBase64String(buf);
+#else
             var sha1 = SHA1.Create();
             var src = sha1.ComputeHash(Encoding.UTF8.GetBytes(buff.ToString()));
 
             return Convert.ToBase64String(src);
+#endif
         }
 
         // As server
@@ -1280,12 +1306,17 @@ namespace Unosquare.Net
             _stream?.Dispose();
             _stream = null;
 
+#if WINDOWS_UWP
+            _streamSocket?.Dispose();
+            _streamSocket = null;
+#else
 #if NET46
             _tcpClient?.Close();
 #else
             _tcpClient?.Dispose();
 #endif
             _tcpClient = null;
+#endif
         }
 
         private void ReleaseCommonResources()
@@ -1527,6 +1558,11 @@ namespace Unosquare.Net
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task SetClientStream()
         {
+#if WINDOWS_UWP
+            _streamSocket = new StreamSocket();
+            await _streamSocket.ConnectAsync(new HostName(_uri.DnsSafeHost), _uri.Port.ToString());
+            _stream = _streamSocket.GetStream();
+#else
 #if NET46
             _tcpClient = new TcpClient(_uri.DnsSafeHost, _uri.Port);
 #else
@@ -1535,6 +1571,7 @@ namespace Unosquare.Net
             await _tcpClient.ConnectAsync(_uri.DnsSafeHost, _uri.Port);
 #endif
             _stream = _tcpClient.GetStream();
+#endif
 
 #if SSL
             if (_secure)
@@ -1569,7 +1606,7 @@ namespace Unosquare.Net
 #endif
         }
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-        
+
         private void StartReceiving()
         {
             if (_messageEventQueue.Count > 0)

@@ -70,7 +70,7 @@
             return webserver;
         }
 
-#if !NETSTANDARD1_3 && !UWP
+#if !NETSTANDARD1_3 && !UWP && !WINDOWS_UWP
         /// <summary>
         /// Add WebApiModule to WebServer
         /// </summary>
@@ -102,7 +102,9 @@
             webserver.RegisterModule(new WebSocketsModule());
             return (assembly != null) ? webserver.LoadWebSockets(assembly) : webserver;
         }
+#endif
 
+#if !WINDOWS_UWP
         /// <summary>
         /// Load all the WebApi Controllers in an assembly.
         /// </summary>

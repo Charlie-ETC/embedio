@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DDF60AB0-56BE-4EB0-B8E5-837C58D6EFF9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Unosquare.Labs.EmbedIO</RootNamespace>
+    <AssemblyName>Unosquare.Labs.EmbedIO</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.15063.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion>10.0.10586.0</TargetPlatformMinVersion>
+    <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Constants\CompressionMethod.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Constants\Headers.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Constants\HttpVerbs.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Constants\MimeTypes.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Constants\Responses.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Constants\RoutingStrategy.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Constants\Strings.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Extensions.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Extensions.Fluent.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\FormDataParser.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\ISessionWebModule.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\IWebModule.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\MethodCache.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\ModuleMap.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\CorsModule.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\FallbackModule.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\LocalSessionModule.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\RamCache.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\StaticFilesModule.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\VirtualPaths.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\WebApiHandlerAttribute.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\WebApiModule.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\WebSocketHandlerAttribute.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\Modules\WebSocketsModule.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\SessionInfo.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\CloseEventArgs.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\CloseStatusCode.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\CookieCollection.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\EndPointListener.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\EndPointManager.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpBase.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpConnection.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpListener.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpListenerContext.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpListenerException.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpListenerPrefixCollection.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpListenerRequest.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpListenerRequestUriBuilder.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpListenerResponse.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpListenerResponseHelper.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpRequest.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpResponse.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\HttpSysSettings.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\ListenerPrefix.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\MessageEventArgs.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\NetExtensions.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\Opcode.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\PayloadData.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\RequestStream.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\ResponseStream.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\SystemUri.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\WebHeaderCollection.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\WebSocket.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\WebSocketContext.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\WebSocketException.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\WebSocketFrame.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\WebSocketReceiveResult.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\WebSocketState.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\System.Net\WebSocketValidator.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\WebModuleBase.cs" />
+    <Compile Include="..\Unosquare.Labs.EmbedIO\WebServer.cs" />
+    <EmbeddedResource Include="Properties\Unosquare.Labs.EmbedIO.Uwp.rd.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+      <Version>6.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Unosquare.Swan">
+      <Version>0.17.1</Version>
+    </PackageReference>
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
+    <VisualStudioVersion>14.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

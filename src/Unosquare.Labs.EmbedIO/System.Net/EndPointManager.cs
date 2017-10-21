@@ -30,6 +30,11 @@ namespace Unosquare.Net
     using System;
     using System.Collections;
     using System.Net;
+#if WINDOWS_UWP
+    using System.Collections.Generic;
+    using Windows.Networking;
+    using Windows.Networking.Sockets;
+#endif
 
     internal static class EndPointManager
     {
@@ -127,6 +132,14 @@ namespace Unosquare.Net
             }
             else if (IPAddress.TryParse(host, out addr) == false)
             {
+#if WINDOWS_UWP
+                HostName hostName = new HostName(host);
+                IReadOnlyList<EndpointPair> eps = DatagramSocket.GetEndpointPairsAsync(hostName, port.ToString()).GetResults();
+                if (eps.Count > 0)
+                {
+                    IPAddress.TryParse(eps[0].RemoteHostName.DisplayName, out addr);
+                }
+#else
                 try
                 {
                     var iphost = new IPHostEntry
@@ -141,6 +154,7 @@ namespace Unosquare.Net
                 {
                     addr = IPAddress.Any;
                 }
+#endif
             }
 
             Hashtable p;  // Dictionary<int, EndPointListener>

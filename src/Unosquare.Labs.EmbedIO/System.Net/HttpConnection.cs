@@ -35,8 +35,12 @@ namespace Unosquare.Net
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
+    using Unosquare.Labs.EmbedIO;
 #if SSL
 using System.Security.Cryptography.X509Certificates;
+#endif
+#if WINDOWS_UWP
+    using Windows.Networking.Sockets;
 #endif
 
     internal sealed class HttpConnection
@@ -57,7 +61,11 @@ using System.Security.Cryptography.X509Certificates;
         private const int BufferSize = 8192;
         private readonly Timer _timer;
         private readonly EndPointListener _epl;
+#if WINDOWS_UWP
+        private StreamSocket _sock;
+#else
         private Socket _sock;
+#endif
         private MemoryStream _ms;
         private byte[] _buffer;
         private HttpListenerContext _context;
@@ -78,9 +86,17 @@ using System.Security.Cryptography.X509Certificates;
 #endif
 
 #if SSL
+#if WINDOWS_UWP
+        public HttpConnection(StreamSocket sock, EndPointListener epl, bool secure, X509Certificate cert)
+#else
         public HttpConnection(Socket sock, EndPointListener epl, bool secure, X509Certificate cert)
+#endif
+#else
+#if WINDOWS_UWP
+        public HttpConnection(StreamSocket sock, EndPointListener epl)
 #else
         public HttpConnection(Socket sock, EndPointListener epl)
+#endif
 #endif
         {
             _sock = sock;
@@ -91,13 +107,21 @@ using System.Security.Cryptography.X509Certificates;
 
             if (!secure)
             {
+#if WINDOWS_UWP
+                Stream = sock.GetStream();
+#else
                 Stream = new NetworkStream(sock, false);
+#endif
             }
             else
             {                
             _cert = cert;
 
+#if WINDOWS_UWP
+                ssl_stream = epl.Listener.CreateSslStream(sock.GetStream(), false, (t, c, ch, e) =>
+#else
                 ssl_stream = epl.Listener.CreateSslStream(new NetworkStream(sock, false), false, (t, c, ch, e) =>
+#endif
                 {
                     if (c == null)
                         return true;
@@ -111,7 +135,11 @@ using System.Security.Cryptography.X509Certificates;
                 stream = ssl_stream.AuthenticatedStream;
             }
 #else
+#if WINDOWS_UWP
+            Stream = sock.GetStream();
+#else
             Stream = new NetworkStream(sock, false);
+#endif
 #endif
             _timer = new Timer(OnTimeout, null, Timeout.Infinite, Timeout.Infinite);
             Init();
@@ -135,13 +163,32 @@ using System.Security.Cryptography.X509Certificates;
             {
                 if (_localEp != null)
                     return _localEp;
-
+#if WINDOWS_UWP
+                _localEp = new IPEndPoint(
+                    IPAddress.Parse(_sock.Information.LocalAddress.CanonicalName),
+                    Convert.ToInt32(_sock.Information.LocalPort)
+                );
+#else
                 _localEp = (IPEndPoint)_sock.LocalEndPoint;
+#endif
                 return _localEp;
             }
         }
 
+#if WINDOWS_UWP
+        public IPEndPoint RemoteEndPoint
+        {
+            get
+            {
+                return new IPEndPoint(
+                    IPAddress.Parse(_sock.Information.RemoteAddress.CanonicalName),
+                    Convert.ToInt32(_sock.Information.RemotePort)
+                );
+            }
+        }
+#else
         public IPEndPoint RemoteEndPoint => (IPEndPoint)_sock?.RemoteEndPoint;
+#endif
 #if SSL
         public bool IsSecure { get; }
 #endif
@@ -224,7 +271,9 @@ using System.Security.Cryptography.X509Certificates;
 
             try
             {
+#if !WINDOWS_UWP
                 s?.Shutdown(SocketShutdown.Both);
+#endif
             }
             catch
             {

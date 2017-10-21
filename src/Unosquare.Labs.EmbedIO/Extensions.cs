@@ -1,19 +1,23 @@
-﻿namespace Unosquare.Labs.EmbedIO
+﻿using System.Collections.Generic;
+using System;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Unosquare.Labs.EmbedIO
 {
     using Constants;
-    using System.Collections.Generic;
-    using System;
-    using System.IO;
-    using System.IO.Compression;
-    using System.Linq;
-    using System.Text;
     using Swan.Formatters;
-    using System.Threading;
-    using System.Threading.Tasks;
 #if NET47
     using System.Net;
 #else
     using Net;
+#endif
+#if WINDOWS_UWP
+    using Windows.Networking.Sockets;
 #endif
 
     /// <summary>
@@ -443,6 +447,81 @@
             }
         }
 
+        #endregion
+
+        #region Universal Windows Platform Helper Methods
+        public static Stream GetStream(this StreamSocket streamSocket)
+        {
+            return new DuplexStream(
+                streamSocket.InputStream.AsStreamForRead(),
+                streamSocket.OutputStream.AsStreamForWrite()
+            );
+
+        }
+
+        class DuplexStream : Stream
+        {
+            public override bool CanRead => true;
+
+            public override bool CanSeek => true;
+
+            public override bool CanWrite => true;
+
+            public override long Length
+            {
+                get
+                {
+                    return _inputStream.Length;
+                }
+            }
+
+            public override long Position
+            {
+                get => _inputStream.Position;
+                set
+                {
+                    _inputStream.Position = value;
+                    _outputStream.Position = value;
+                }
+            }
+
+            private Stream _inputStream;
+            private Stream _outputStream;
+
+            public DuplexStream(Stream inputStream, Stream outputStream)
+            {
+                _inputStream = inputStream;
+                _outputStream = outputStream;
+            }
+
+            public override void Flush()
+            {
+                _inputStream.Flush();
+                _outputStream.Flush();
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                return _inputStream.Read(buffer, offset, count);
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                // Not sure if this is the right implementation, but should work.
+                _inputStream.Seek(offset, origin);
+                return _outputStream.Seek(offset, origin);
+            }
+
+            public override void SetLength(long value)
+            {
+                _outputStream.SetLength(value);
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                _outputStream.Write(buffer, offset, count);
+            }
+        }
         #endregion
     }
 }
