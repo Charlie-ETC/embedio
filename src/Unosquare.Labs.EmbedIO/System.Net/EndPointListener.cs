@@ -83,8 +83,15 @@ using System.Security.Cryptography;
             {
                 OnAccept(this, streamSockListener, args);
             };
-            _sockListener.BindEndpointAsync(new HostName(
-                _endpoint.Address.ToString()), _endpoint.Port.ToString()).GetResults();
+            if (_endpoint.Address == IPAddress.Any)
+            {
+                _sockListener.BindServiceNameAsync(_endpoint.Port.ToString()).GetResults();
+            }
+            else
+            {
+                _sockListener.BindEndpointAsync(new HostName(
+                    _endpoint.Address.ToString()), _endpoint.Port.ToString()).GetResults();
+            }
 #else
             _sock = new Socket(addr.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             _sock.Bind(_endpoint);

@@ -449,7 +449,8 @@ namespace Unosquare.Labs.EmbedIO
 
         #endregion
 
-        #region Universal Windows Platform Helper Methods
+#if WINDOWS_UWP
+#region Universal Windows Platform Helper Methods
         public static Stream GetStream(this StreamSocket streamSocket)
         {
             return new DuplexStream(
@@ -522,6 +523,7 @@ namespace Unosquare.Labs.EmbedIO
                 _outputStream.Write(buffer, offset, count);
             }
         }
-        #endregion
+#endregion
+#endif
     }
 }

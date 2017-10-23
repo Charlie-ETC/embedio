@@ -102,9 +102,7 @@
             webserver.RegisterModule(new WebSocketsModule());
             return (assembly != null) ? webserver.LoadWebSockets(assembly) : webserver;
         }
-#endif
 
-#if !WINDOWS_UWP
         /// <summary>
         /// Load all the WebApi Controllers in an assembly.
         /// </summary>
