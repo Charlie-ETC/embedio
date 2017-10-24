@@ -241,6 +241,9 @@ namespace Unosquare.Net
                 try
                 {
                     _stream.Write(buffer, offset, count);
+#if WINDOWS_UWP
+                    _stream.Flush();
+#endif
                 }
                 catch
                 {
@@ -250,6 +253,9 @@ namespace Unosquare.Net
             else
             {
                 _stream.Write(buffer, offset, count);
+#if WINDOWS_UWP
+                _stream.Flush();
+#endif
             }
         }
 
